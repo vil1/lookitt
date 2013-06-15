@@ -4,36 +4,45 @@ import akka.actor.Actor
 import java.net.URL
 import play.api.libs.iteratee.{Iteratee, Concurrent}
 
+import models.User
+
 /**
  * @author Valentin Kasas
  */
-case class CodingSession(repository: URL, revision: String) extends Actor{
+class CodingSession extends Actor{
 
   var users = Set[User]()
-  val (enumerator, channel) = Concurrent.broadcast[Diff]
+  val (enumerator, channel) = Concurrent.broadcast[String]
 
-  def receive = {
+  def receiveInternal:PartialFunction[Any, Unit] = {
+
+
     case Connect(user) => {
       if (!users.contains(user)){
-        val iteratee = Iteratee.foreach[Diff]{ diff =>
-          self ! Emit(user, diff)
+        val iteratee = Iteratee.foreach[String]{ msg =>
+          self ! Emit(user, msg)
         }.mapDone { _ =>
           self ! Disconnect(user)
         }
         users += user
+        println("added %s" format user)
         sender ! (iteratee, enumerator)
       } else {
-        sender ! (Iteratee.ignore[Diff], enumerator)
+        sender ! (Iteratee.ignore[String], enumerator)
       }
     }
     case Disconnect(user) => users -= user
-    case Emit(user, diff) => channel.push(diff)
+    case Emit(user, msg) => channel.push(msg)
+
+  }
+
+  def receive = {
+    case msg =>
+    println(msg)
+    receiveInternal(msg)
   }
 }
 
 case class Connect(user: User)
 case class Disconnect(user: User)
-case class Emit(user: User, diff: Diff)
-
-trait User
-trait Diff
+case class Emit(user: User, msg: String)
