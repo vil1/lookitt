@@ -1,48 +1,76 @@
 package org.lookitt.actors
 
-import akka.actor.Actor
+import akka.actor.{ActorRef, Actor}
 import java.net.URL
-import play.api.libs.iteratee.{Iteratee, Concurrent}
+import play.api.libs.iteratee.{Enumerator, Iteratee, Concurrent}
 
+import Concurrent.Channel
 import models.User
+import java.util.UUID
 
 /**
  * @author Valentin Kasas
  */
 class CodingSession extends Actor{
 
-  var users = Set[User]()
-  val (enumerator, channel) = Concurrent.broadcast[String]
-
-  def receiveInternal:PartialFunction[Any, Unit] = {
+  import CodingSession._
 
 
-    case Connect(user) => {
-      if (!users.contains(user)){
-        val iteratee = Iteratee.foreach[String]{ msg =>
-          self ! Emit(user, msg)
-        }.mapDone { _ =>
-          self ! Disconnect(user)
-        }
-        users += user
-        println("added %s" format user)
-        sender ! (iteratee, enumerator)
+  var activeSessions = Map[String, Session]()
+
+  def receive=  {
+
+
+    case Connect(user, sessionId) => {
+      val session = activeSessions.getOrElse(sessionId, {
+        val (enum, chan) = Concurrent.broadcast[Message]
+        Session(sessionId, enum, chan, user)
+      })
+      activeSessions += (sessionId -> session)
+      println(session, user)
+      if (!session.users.contains(user)){
+        session.connect(user, self, sender)
       } else {
-        sender ! (Iteratee.ignore[String], enumerator)
+        sender ! (Iteratee.ignore[Message], session.enumerator)
+      }
+
+    }
+    case Disconnect(user, session) => {
+      session.users -= user
+      if (session.users.isEmpty){
+        activeSessions -= session.id
       }
     }
-    case Disconnect(user) => users -= user
-    case Emit(user, msg) => channel.push(msg)
+    case Emit(user, msg, session) => session.channel.push(msg)
 
   }
 
-  def receive = {
-    case msg =>
-    println(msg)
-    receiveInternal(msg)
-  }
 }
 
-case class Connect(user: User)
-case class Disconnect(user: User)
-case class Emit(user: User, msg: String)
+object CodingSession{
+
+  type Message = String
+
+
+  case class Session(id: String, enumerator: Enumerator[Message], channel: Channel[Message], owner:User){
+    var users = Set[User]()
+
+    def connect(user: User, actor: ActorRef, sender: ActorRef){
+      users += user
+      val iteratee = Iteratee.foreach[Message]{ msg =>
+        actor ! Emit(user, msg, this)
+      }.mapDone { _ =>
+        actor ! Disconnect(user, this)
+      }
+      users += user
+      println("added %s [%s]" format (user, users))
+      sender ! (iteratee, enumerator)
+
+    }
+  }
+
+}
+
+case class Connect(user: User, sessionId : String )
+case class Disconnect(user: User, session: CodingSession.Session)
+case class Emit(user: User, msg: String, session: CodingSession.Session)

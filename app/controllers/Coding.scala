@@ -1,6 +1,6 @@
 package controllers
 
-import play.api.mvc.{WebSocket, Action, Controller}
+import play.api.mvc.{AnyContent, WebSocket, Action, Controller}
 import org.lookitt.actors.{Connect, CodingSession}
 import models.User
 import play.api.libs.iteratee.{Enumerator, Iteratee}
@@ -11,6 +11,9 @@ import play.api.libs.concurrent.Akka
 import akka.pattern._
 
 import play.api.Play.current
+import java.util.UUID
+import scala.concurrent.ExecutionContext
+
 /**
  * @author Valentin Kasas
  */
@@ -19,16 +22,24 @@ object Coding extends Controller {
   implicit val timeout = Timeout(1, TimeUnit.SECONDS)
   val session = Akka.system.actorOf(Props[CodingSession])
 
-  def joinSession(username: String) = Action {
-    implicit request =>
-      Ok(views.html.code.joinSession(username))
+
+  def createSession(username:String):Action[AnyContent] = Action {
+    Redirect(routes.Coding.joinSession(username, UUID.randomUUID().toString))
   }
 
-  def sessionSocket(username: String) = WebSocket.async {
+  def joinSession(username: String, sessionId: String) = Action {
+    implicit request =>
+      Ok(views.html.code.joinSession(username, sessionId))
+  }
+
+  import ExecutionContext.Implicits.global
+  def sessionSocket(sessionId:String, username: String) = WebSocket.async {
     request =>
       val user = User.find(username)
-      val future = session ? Connect(user)
-      future.mapTo[(Iteratee[String, _], Enumerator[String])]
+      val future = session ? Connect(user, sessionId)
+      future.mapTo[(Iteratee[String, _], Enumerator[String])].andThen{
+        case some => println("Connection accepted : %s" format some)
+      }
   }
 
 }

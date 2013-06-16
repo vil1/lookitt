@@ -1,4 +1,4 @@
-@(username: String)(implicit request:RequestHeader)
+@(username: String, sessionId: String)(implicit request:RequestHeader)
 
 @main("Lookitt") {
     <h2>Welcome @username</h2>
@@ -12,7 +12,7 @@
     <div id="debug"></div>
     <script type="text/javascript">
         $(function() {
-            var session = new lookitt.Session("ws://@request.host@routes.Coding.sessionSocket(username)");
+            var session = new lookitt.Session("ws://@request.host@routes.Coding.sessionSocket(sessionId, username)");
             var debugHandler = {'session': session, 'id' : session.attach(function(message){
                 console.log(message.content)
                 return message;
