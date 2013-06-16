@@ -2,30 +2,22 @@
 
 @main("Lookitt") {
     <h2>Welcome @username</h2>
-    <form id="editor">
+    <div id="editor">
 
-        <div id="currentFile">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        <div data-resource="file">
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit, <span>sed do eiusmod</span> tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
         </div>
-        <button type="submit">Lookitt!</button>
-    </form>
+        <button id="submit">Lookitt!</button>
+    </div>
     <div id="debug"></div>
     <script type="text/javascript">
         $(function() {
             var session = new lookitt.Session("ws://@request.host@routes.Coding.sessionSocket(username)");
-
-            $('#editor').submit(function(){
-                if(window.getSelection().rangeCount){
-
-                    var selection = window.getSelection().getRangeAt(0);
-                    session.send(JSON.stringify({
-                        'start':selection.startOffset,
-                        'end': selection.endOffset
-                    }));
-                }
-                return false;
-            });
-
+            var debugHandler = {'session': session, 'id' : session.attach(function(message){
+                console.log(message.content)
+                return message;
+            })};
+            var editor = new lookitt.Editor(session, 'editor')
         })
     </script>
 }
