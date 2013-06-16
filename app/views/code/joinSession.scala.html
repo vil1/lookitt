@@ -1,7 +1,6 @@
 @(username: String, sessionId: String)(implicit request:RequestHeader)
 
 @main("Lookitt") {
-    <h2>Welcome @username</h2>
     <div id="editor">
 
         <div data-resource="file">
@@ -9,7 +8,7 @@
         </div>
         <button id="submit">Lookitt!</button>
     </div>
-    <div id="debug"></div>
+
     <script type="text/javascript">
         $(function() {
             var session = new lookitt.Session("ws://@request.host@routes.Coding.sessionSocket(sessionId, username)");
