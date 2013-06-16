@@ -12,7 +12,6 @@ import akka.pattern._
 
 import play.api.Play.current
 import java.util.UUID
-import scala.concurrent.ExecutionContext
 
 /**
  * @author Valentin Kasas
@@ -32,14 +31,11 @@ object Coding extends Controller {
       Ok(views.html.code.joinSession(username, sessionId))
   }
 
-  import ExecutionContext.Implicits.global
   def sessionSocket(sessionId:String, username: String) = WebSocket.async {
     request =>
       val user = User.find(username)
       val future = session ? Connect(user, sessionId)
-      future.mapTo[(Iteratee[String, _], Enumerator[String])].andThen{
-        case some => println("Connection accepted : %s" format some)
-      }
+      future.mapTo[(Iteratee[String, _], Enumerator[String])]
   }
 
 }

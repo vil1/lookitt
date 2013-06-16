@@ -11,12 +11,13 @@
 
     <script type="text/javascript">
         $(function() {
-            var session = new lookitt.Session("ws://@request.host@routes.Coding.sessionSocket(sessionId, username)");
+            var session = new lookitt.Session("ws://@request.host@routes.Coding.sessionSocket(sessionId, username)", '@username');
             var debugHandler = {'session': session, 'id' : session.attach(function(message){
                 console.log(message.content)
                 return message;
             })};
-            var editor = new lookitt.Editor(session, 'editor')
+            var editor = new lookitt.Editor(session, 'editor');
+            var timeline = new lookitt.Timeline(session);
         })
     </script>
 }

@@ -1,24 +1,13 @@
 class lookitt.Editor
 
   constructor: (session) ->
-    session.attach (message) ->
-      container = $("#editor").find('[data-resource="file"]')[0]
-      console.log("caught")
-      data = JSON.parse message.data
-      range = document.createRange()
-      range.setStart(resolve(container, data.startPath), data.start)
-      range.setEnd(resolve(container, data.endPath), data.end)
-      selection = window.getSelection()
-      selection.removeAllRanges()
-      selection.addRange(range)
-
 
     $("#submit").click(() ->
       if (window.getSelection().rangeCount)
         range = window.getSelection().getRangeAt(0)
         container = verifySelection(range)
         if container
-          session.send(JSON.stringify(container))
+          session.send(container)
       return false
     )
 
@@ -49,9 +38,4 @@ class lookitt.Editor
           path
       recurse(descendant,[])
 
-    resolve = (node, path) ->
-      if path.length
-        [id, tail...] = path
-        resolve(node.childNodes[id], tail)
-      else
-        node
+
