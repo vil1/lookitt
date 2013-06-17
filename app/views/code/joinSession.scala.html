@@ -3,9 +3,9 @@
 @main("Lookitt") {
     <div id="editor">
 
-        <div data-resource="file">
+        <pre data-resource="file" id="container" >
             Lorem ipsum dolor sit amet, consectetur adipisicing elit, <span>sed do eiusmod</span> tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </div>
+        </pre>
         <button id="submit">Lookitt!</button>
     </div>
 
@@ -18,6 +18,10 @@
             })};
             var editor = new lookitt.Editor(session, 'editor');
             var timeline = new lookitt.Timeline(session);
+        })
+        $.ajax('@routes.Repository.getResource("file:///fast/data/cms/pom.xml")').success(function(data){
+            $('#container').text(data.content)
+            $('#container').snippet("xml",{'style': 'vim-dark', 'box':'2,4-6'})
         })
     </script>
 }

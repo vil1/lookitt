@@ -1,7 +1,7 @@
 package controllers
 
-import play.api.mvc.{AnyContent, WebSocket, Action, Controller}
 import org.lookitt.actors.{Connect, CodingSession}
+import play.api.mvc.{AnyContent, WebSocket, Action, Controller}
 import models.User
 import play.api.libs.iteratee.{Enumerator, Iteratee}
 import akka.actor.Props
