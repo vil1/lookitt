@@ -1,9 +1,10 @@
 package controllers
 
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{ResponseHeader, SimpleResult, Action, Controller}
 import play.api.libs.json.Json
 import akka.actor.IOManager
 import scala.io.Source
+import play.api.libs.iteratee.Enumerator
 
 /**
  * @author Valentin Kasas
@@ -11,13 +12,17 @@ import scala.io.Source
 object Repository extends Controller {
 
   def getResource(uri: String) = Action {
-    val source = Source.fromURL(uri)
-    val dto = Map(
-      "uri" -> uri,
-      "content" -> source.getLines().fold("")(_+ "\n" +_)
+    val file = new java.io.File(new java.net.URI(uri))
+    val filename = file.getName
+    val extension = filename.substring(filename.lastIndexOf('.') + 1)
+    SimpleResult (
+      header = ResponseHeader(200, Map(
+        CONTENT_LENGTH -> file.length.toString,
+        CONTENT_TYPE -> TEXT,
+        "lookitt.filetype" -> extension,
+        "lookitt.filename" -> filename
+      )),
+      body = Enumerator.fromFile(file)
     )
-    Ok(Json.toJson(dto))
   }
-
-
 }

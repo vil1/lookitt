@@ -19,9 +19,10 @@
             var editor = new lookitt.Editor(session, 'editor');
             var timeline = new lookitt.Timeline(session);
         })
-        $.ajax('@routes.Repository.getResource("file:///fast/data/cms/pom.xml")').success(function(data){
-            $('#container').text(data.content)
-            $('#container').snippet("xml",{'style': 'vim-dark', 'box':'2,4-6'})
+        $.ajax('@routes.Repository.getResource("file:///home/valentin/data/src/cms/api-impl/src/main/java/com/fullsix/edito/init/InitBean.java")').success(function(data, status, xhr){
+            $('#container').text(data)
+            var filetype = xhr.getResponseHeader('lookitt.filetype') || "java";
+            $('#container').snippet(filetype,{'style': 'vim-dark', 'box':'2,4-6'})
         })
     </script>
 }
