@@ -4,6 +4,6 @@ class lookitt.Session
 
   send : (msg) -> @ws.send(JSON.stringify({'user' : @user, 'payload': msg}))
 
-  attach: (handler) ->
+  attach: (handler) =>
     @ws.addEventListener("message", handler)
 

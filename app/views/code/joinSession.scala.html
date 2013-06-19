@@ -1,7 +1,7 @@
 @(username: String, sessionId: String)(implicit request:RequestHeader)
 
 @main("Lookitt") {
-    <div id="editor" data-toggle="popover">
+    <div id="editor" >
 
         <pre data-resource="file" id="container" >
             Lorem ipsum dolor sit amet, consectetur adipisicing elit, <span>sed do eiusmod</span> tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
@@ -19,7 +19,7 @@
             var editor = new lookitt.Editor(session, 'editor');
             var timeline = new lookitt.Timeline(session);
         })
-        $.ajax('@routes.Repository.getResource("file:///home/valentin/data/src/cms/api-impl/src/main/java/com/fullsix/edito/init/InitBean.java")').success(function(data, status, xhr){
+        $.ajax('@routes.Repository.getResource("file:///fast/data/cms/api-impl/src/main/java/com/fullsix/edito/init/InitBean.java")').success(function(data, status, xhr){
             $('#container').text(data)
             var filetype = xhr.getResponseHeader('lookitt.filetype') || "java";
             $('#container').snippet(filetype,{'style': 'vim-dark', 'box':'2,4-6'})

@@ -16,38 +16,25 @@ class lookitt.Editor
       'placement': 'bottom'
     })
 
-    $('#editor').bind('keyup mouseup',(event) ->
+    $(document).bind('keyup mouseup',(event) ->
       if (window.getSelection().rangeCount)
         range = window.getSelection().getRangeAt(0)
         container = verifySelection(range) unless range.collapsed
         if container
-          $('#editor').popover('toggle')
+          $('#editor').popover('show')
+        return false
     )
 
   verifySelection = (range) =>
-    container = $("#editor").find('[data-resource="file"]')[0]
-    containerRange =  document.createRange()
-    containerRange.setStart(container, 0)
-    containerRange.setEnd(container, container.childNodes.length)
+    container = $('#editor pre[data-resource="file"]')
     return {
       startPath: getPathFrom(container, range.startContainer),
       start: range.startOffset,
       endPath: getPathFrom(container, range.endContainer),
       end: range.endOffset,
-    } if containerRange.compareBoundaryPoints(Range.START_TO_START, range) is -1 and containerRange.compareBoundaryPoints(Range.END_TO_END, range) is 1
+    } if $(range.commonAncestorContainer).parents().filter($('#editor'))
 
-  getPathFrom = (container, descendant) =>
-    recurse = (node, path) ->
-      if node isnt container
-        siblings = node.parentNode.childNodes
-        s = for child, id in siblings
-          {'item':child, 'id':id}
-        index = s.filter((elem)->
-          elem.item is node
-        )[0]
-        recurse node.parentNode, [index.id, path...]
-      else
-        path
-    recurse(descendant,[])
+  getPathFrom = (node, descendant) =>
+    $.map($(descendant).parentsUntil(node),(n) -> $(n).index()).reverse()
 
 
