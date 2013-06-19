@@ -19,7 +19,7 @@ class lookitt.Editor
     $('#editor').bind('keyup mouseup',(event) ->
       if (window.getSelection().rangeCount)
         range = window.getSelection().getRangeAt(0)
-        container = verifySelection(range) unless range.collapsed()
+        container = verifySelection(range) unless range.collapsed
         if container
           $('#editor').popover('toggle')
     )
